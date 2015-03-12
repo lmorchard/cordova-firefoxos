@@ -19,7 +19,7 @@
        under the License.
 */
 
-var findSimulators = require('node-firefox-find-simulators');
+var common = require('./common');
 var startSimulator = require('node-firefox-start-simulator');
 
 var args = process.argv;
@@ -34,31 +34,21 @@ if(args.length > 2) {
      }
 }
 
-findSimulators().then(function(simulators) {
-
-    var versions = {};
-    simulators.forEach(function(simulator) {
-        versions[simulator.version] = true;
-    });
-
-    if (install_target && !versions[install_target]) {
+common.collectSimulatorVersions().then(function (versions) {
+    if (install_target && versions.indexOf(install_target) === -1) {
         console.error('ERROR : emulator \'' + install_target + '\' does not exist.');
         process.exit(2);
     }
-
     return startSimulator({
         version: install_target,
         detached: true
     });
-
 }).then(function(simulator) {
-
-    console.log("FirefoxOS simulator started on port " + simulator.port + ", PID " + simulator.pid);
+    console.log("FirefoxOS simulator started on port " + simulator.port +
+                ", PID " + simulator.pid +
+                " - " + simulator.binary);
     process.exit(0);
-
 }).catch(function(err) {
-
     console.error('ERROR: ' + err);
     process.exit(2);
-
 });

@@ -19,14 +19,15 @@
        under the License.
 */
 
-var common = require('./common');
-var findSimulators = require('node-firefox-find-simulators');
+var findPorts = require('node-firefox-find-ports');
 
-common.collectSimulatorVersions().then(function (versions) {
-    versions.forEach(function (version) {
-        console.log(version);
+findPorts({
+    firefoxOSSimulator: true,
+    detailed: true 
+}).then(function(results) {
+    results.forEach(function (result) {
+        console.log(result.port + ' ' +
+                    result.device.name + ' ' +
+                    result.device.version);
     });
-}).catch(function(err) {
-    console.error('ERROR: ' + err);
-    process.exit(2);
 });
