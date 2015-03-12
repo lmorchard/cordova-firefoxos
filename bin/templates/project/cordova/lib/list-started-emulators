@@ -30,4 +30,7 @@ findPorts({
                     result.device.name + ' ' +
                     result.device.version);
     });
+}).catch(function(err) {
+    console.error('ERROR: ' + err);
+    process.exit(2);
 });

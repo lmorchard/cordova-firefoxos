@@ -44,8 +44,8 @@ common.collectSimulatorVersions().then(function (versions) {
         detached: true
     });
 }).then(function(simulator) {
-    console.log("FirefoxOS simulator started on port " + simulator.port +
-                ", PID " + simulator.pid +
+    console.log(simulator.port + 
+                " FirefoxOS simulator started with PID " + simulator.pid +
                 " - " + simulator.binary);
     process.exit(0);
 }).catch(function(err) {
