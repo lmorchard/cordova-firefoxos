@@ -14,6 +14,7 @@
   ],
   "dependencies": {
     "archiver": "^0.14.3",
+    "es6-promise": "^2.0.1",
     "node-firefox-connect": "^1.0.0",
     "node-firefox-find-app": "^1.0.0",
     "node-firefox-find-ports": "^1.0.0",
