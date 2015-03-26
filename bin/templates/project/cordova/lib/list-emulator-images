@@ -20,7 +20,6 @@
 */
 
 var common = require('./common');
-var findSimulators = require('node-firefox-find-simulators');
 
 common.collectSimulatorVersions().then(function (versions) {
     versions.forEach(function (version) {

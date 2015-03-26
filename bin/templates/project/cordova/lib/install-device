@@ -19,14 +19,51 @@
        under the License.
 */
 
-var common = require('./common');
-var findDevices = require('node-firefox-find-devices');
+var fs = require('fs');
+var path = require('path');
 
-findDevices().then(function (devices) {
-    devices.forEach(function (device) {
-        console.log(device.id);
+var Promise = require('es6-promise').Promise;
+
+var common = require('./common');
+
+var findPorts = require('node-firefox-find-ports');
+var findDevices = require('node-firefox-find-devices');
+var forwardPorts = require('node-firefox-forward-ports');
+var connect = require('node-firefox-connect');
+
+var args = process.argv;
+var install_target;
+if(args.length > 2) {
+    if (args[2].substring(0, 9) == '--target=') {
+        install_target = args[2].substring(9, args[2].length);
+     } else {
+        console.error('ERROR : argument \'' + args[2] + '\' not recognized.');
+        process.exit(2);
+     }
+}
+
+
+return forwardPorts([
+    { id: install_target }
+]).then(function() {
+    return findPorts({ firefoxOSDevice: true });
+}).then(function(ports) {
+
+    var targetPorts = ports.filter(function (port) {
+        return port.deviceId === install_target;
     });
+    if (targetPorts.length === 0) {
+        throw new Error('Could not find device \'' + install_target + '\'.');
+    }
+    return connect(targetPorts[0].port);
+
+}).then(common.pushApp).then(function(result) {
+
+    process.exit(0);
+
 }).catch(function(err) {
+
     console.error('ERROR: ' + err);
     process.exit(2);
+
 });

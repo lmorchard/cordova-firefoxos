@@ -24,12 +24,10 @@ var path = require('path');
 
 var Promise = require('es6-promise').Promise;
 
+var common = require('./common');
+
 var findPorts = require('node-firefox-find-ports');
 var connect = require('node-firefox-connect');
-var installApp = require('node-firefox-install-app');
-var findApp = require('node-firefox-find-app');
-var launchApp = require('node-firefox-launch-app');
-var uninstallApp = require('node-firefox-uninstall-app');
 
 var args = process.argv;
 var install_target;
@@ -42,8 +40,6 @@ if(args.length > 2) {
      }
 }
 
-var port, client, appPath, manifest, appId, installedApp;
-
 findPorts({
     firefoxOSSimulator: true,
     detailed: true 
@@ -54,6 +50,7 @@ findPorts({
         return '' + result.port;
     });
 
+    var port;
     if (!install_target) {
         port = ports[0];
     } else {
@@ -63,59 +60,16 @@ findPorts({
         port = install_target;
     }
 
+    console.log('Connecting to simulator on ' + port);
     return connect(port);
 
-}).then(function(result) {
-    
-    client = result;
+}).then(common.pushApp).then(function(result) {
 
-    console.log('Connected to simulator on ' + port);
-
-    appPath = path.join(path.dirname(path.dirname(__dirname)), 'www');
-    manifest = JSON.parse(fs.readFileSync(appPath + '/manifest.webapp'));
-
-    return findApp({ client: client, manifest: manifest });
-
-}).then(function(apps) {
-
-    if (apps.length === 0) {
-        // If there are no pre-existing installations, just install.
-        return installApp({ client: client, appPath: appPath });
-    }
-    
-    // Otherwise, we should clean up pre-existing installations before pushing
-    // this new version to the simulator.
-    return Promise.all(apps.map(function (app) {
-      return uninstallApp({ client: client, manifestURL: app.manifestURL });
-    })).then(function (uninstalled) {
-        console.log("Uninstalled " + uninstalled.length + " old version(s)");
-        return installApp({ client: client, appPath: appPath });
-    });
-
-}).then(function(result) {
-
-    appId = result;
-    console.log('App was installed with appId =', appId);
-
-    return findApp({ client: client, manifest: manifest });
-
-}).then(function(apps) {
-
-    installedApp = apps.filter(function (app) {
-        return app.id == appId;
-    })[0];
-
-    if (!installedApp) {
-        throw new Error('Installed app not found!');
-    }
-
-    return launchApp({ client: client, manifestURL: installedApp.manifestURL });
-
-}).then(function(result) {
-
-  process.exit(0);
+    process.exit(0);
 
 }).catch(function(err) {
+
     console.error('ERROR: ' + err);
     process.exit(2);
+
 });
