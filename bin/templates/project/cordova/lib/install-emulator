@@ -40,26 +40,9 @@ if(args.length > 2) {
      }
 }
 
-findPorts({
-    firefoxOSSimulator: true,
-    detailed: true 
-}).then(function(results) {
-    
-    var ports = results.map(function(result) {
-        // HACK: Coerce from int to string so indexOf works later on
-        return '' + result.port;
-    });
+common.findOrStartSimulatorTarget(install_target).then(function (simulator) {
 
-    var port;
-    if (!install_target) {
-        port = ports[0];
-    } else {
-        if (ports.indexOf(install_target) === -1) {
-            throw new Error('No such emulator \'' + install_target + '\'.');
-        }
-        port = install_target;
-    }
-
+    var port = simulator.port;
     console.log('Connecting to simulator on ' + port);
     return connect(port);
 

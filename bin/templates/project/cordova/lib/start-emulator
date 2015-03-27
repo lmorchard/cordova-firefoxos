@@ -20,7 +20,6 @@
 */
 
 var common = require('./common');
-var startSimulator = require('node-firefox-start-simulator');
 
 var args = process.argv;
 
@@ -34,19 +33,9 @@ if(args.length > 2) {
      }
 }
 
-common.collectSimulatorVersions().then(function (versions) {
-    if (install_target && versions.indexOf(install_target) === -1) {
-        console.error('ERROR : emulator \'' + install_target + '\' does not exist.');
-        process.exit(2);
-    }
-    return startSimulator({
-        version: install_target,
-        detached: true
-    });
-}).then(function(simulator) {
+common.findOrStartSimulatorTarget(install_target).then(function(simulator) {
     console.log(simulator.port + 
-                " FirefoxOS simulator started with PID " + simulator.pid +
-                " - " + simulator.binary);
+                " FirefoxOS simulator running, PID " + simulator.pid);
     process.exit(0);
 }).catch(function(err) {
     console.error('ERROR: ' + err);

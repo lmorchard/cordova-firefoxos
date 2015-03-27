@@ -56,8 +56,7 @@ exports.run = function(args) {
     try {
 
         var devices = runHelperScript('list-devices');
-        var available_emulators = runHelperScript('list-emulator-images');
-        var emulators = runHelperScript('list-started-emulators');
+        var emulators = runHelperScript('list-emulator-images');
 
         if (list) {
             if (!install_target || install_target == '--emulator') {
@@ -91,25 +90,25 @@ exports.run = function(args) {
             
             if ((use_emulator === null || use_emulator === false)) {
                 if (devices.length) {
-                    // Found a device, so use it as target
-                    console.log('WARNING : No target specified, deploying to device \'' + devices[0] + '\'.');
-                    install_target = devices[0];
+                    // Found a device, so use it as default target
+                    install_target = devices[devices.length - 1];
                     use_emulator = false;
+                    console.log('WARNING : No target specified, deploying to device \'' + install_target + '\'.');
                 }
             }
 
             if ((use_emulator === null || use_emulator === true)) {
-                if (emulators.length) {
-                    // Found an emulator, so use it as target.
-                    console.log('WARNING : No target specified, deploying to emulator');
-                    install_target = emulators[0];
+                var running_emulators = runHelperScript('list-started-emulators');
+                if (running_emulators.length) {
+                    // Found a running emulator, so use it as default target.
+                    install_target = emulators[emulators.length - 1];
                     use_emulator = true;
-                } else {
-                    // No emulator, so start a new one as target.
-                    console.log('WARNING : No target specified, starting emulator for deployment');
-                    emulators = runHelperScript('start-emulator');
-                    install_target = emulators[0];
+                    console.log('WARNING : No target specified, deploying to running emulator \'' + install_target + '\'.');
+                } else if (emulators.length) {
+                    // Found an emulator, so use it as default target.
+                    install_target = emulators[emulators.length - 1];
                     use_emulator = true;
+                    console.log('WARNING : No target specified, starting and deploying to emulator \'' + install_target + '\'.');
                 }
             }
 
